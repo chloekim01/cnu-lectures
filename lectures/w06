@@ -1,0 +1,63 @@
+Interpolatory quadrature: general principle 
+1. Split interval into smaller sub-intervals (typically of equal sizes)
+2. Approximate the function witha polynomial, over each separate sub-interval
+  Pick some points, put polynomial going through 
+  N = 3, 1 parabola going through 3 points
+  N = 2, 1 straight line going through 2 points
+  N points, N-1 degree polynomial
+3. Calculate the integral of the polynomial, over each separate sub-interval
+  Integrate to get the approximation of the sub-interval
+4. Sum the computed polynomial integrals for each sub-interval
+
+Degree of precision - how accurate it would be when estimating the region (depends on the number of points we choose)
+Just because we made the interval smaller, even if the integration gives a straight line, the approximation is relatively close
+Rate of convergence 
+
+# Import out  custom 'integration.py' module
+import integration as intg
+import numpy as np
+
+# Create some test function
+def f(x):
+return np.sqrt(np.cosh(x + 2) * np.exp(-0.5*x**2))
+
+# We want to integrate f over an interval [a, b], sub-divided into N segments
+a, b = -1, 7
+N = 4
+(Increase N to get closer straight line approximation)
+
+#Illustrate the method
+intg.display_diagram('trap', f, a, b, N)
+
+
+Quadrature rules
+A quadrature rule is the method we choose to approximate the function inside each sub-interval
+We choose the reference interval [-1, 1] - easy to adapt the rule to other intervals as it's linear
+
+Definite integral over [-1, 1] f(x)dx ~ \sum_{N-1}_{k=0}w_kf(x_k)
+We call x_k our nodes and w_k weights (scalar numbers)
+Use integral over our reference interval then translate and scale for other intervals
+
+- The nodes are the points in [-1, 1] we choose, where we want our approximating polynomial to coincide with the function. They are interpolation points
+- The weights are determined by aiming for a particular degree of precision
+This gives us a workaround to having to compute polynomial integrals every time
+
+DOP (degree of precision) is m if the quadrature rule integrates polynomials of degree up to m exactly,
+(without error) but not polynomials of degree m+1
+
+It is at least 1 because degree 0 and 1 polynomial is going to give exact solution.
+At least n-1 for m nodes since there is always 1 polynomial going through all points
+
+Trapezoid rule: M = 2 nodes, x_0 = -1, x_1 = 1 (two endpoints)
+-> weights? Needs to have degree of precision at least m = M -1 = 1
+            -> integral between 1 and -1 p(x)dx = w_0 p(-1) + w_1 p(1) when p(x) is any polynomial up to degree 1, p(x) = ax+b, a,b in \mathbb{R}
+-> If it's true for p_0(x) = 1 and p_1(x) = x, then it's true for p(x) = ap_1(x) = bp_0(x) 
+
+integral between 1 and -1 1 dx = w_0 * 1 + w_1 * 1 = [x] between 1 and -1 gives 2
+integral between 1 and -1 x dx = -w_0 + w_1 = [x^2/2] between 1 and -1 gives 0
+implies w_0 = w_1 = 1
+-> Is DOP 2?
+integral between 1 and -1 x^2 dx = [x^3/3] between 1 and -1 gives 1/3 --1/3 = 2/3
+plug weight and nodes 
+(-1)^2 + (1)^2 = 2 neq 2/3
+So the degree of precision is 1
